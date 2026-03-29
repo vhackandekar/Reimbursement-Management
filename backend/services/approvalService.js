@@ -32,10 +32,17 @@ const approveExpense = async (approvalId, userId, comments) => {
         const [[user]] = await connection.execute('SELECT company_id, manager_id FROM Users WHERE id = ?', [expense.user_id]);
 
         // 3. Logic: Check for next steps or rules
-        const [[rule]] = await connection.execute('SELECT * FROM ApprovalRules WHERE company_id = ? AND is_active = TRUE LIMIT 1', [user.company_id]);
+        const [[approver]] = await connection.execute('SELECT role FROM Users WHERE id = ?', [userId]);
 
-        if (rule && rule.rule_type === 'conditional') {
-            await handleConditionalApproval(connection, approval.expense_id, rule);
+        if (approver.role === 'Admin') {
+            // Rule 2: Admin Override Rule
+            await connection.execute('UPDATE Expenses SET status = "approved" WHERE id = ?', [approval.expense_id]);
+            // Also mark any other waiting/pending approvals as 'approved' or just leave them?
+            // Usually, we should probably mark them as 'approved' or 'cancelled' to clean up.
+            // For now, let's just mark the main expense as approved.
+            await connection.execute('UPDATE Approvals SET status = "approved" WHERE expense_id = ? AND status IN ("pending", "waiting")', [approval.expense_id]);
+            
+            sendNotification(expense.user_id, { message: 'Your expense has been approved by Admin!', expenseId: approval.expense_id });
         } else {
             // Default/Sequential Layer
             // Find the current step number

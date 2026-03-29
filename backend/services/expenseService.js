@@ -62,56 +62,70 @@ const getAllCompanyExpenses = async (companyId, role, userId, status) => {
 };
 
 async function initiateApprovalProcess(expenseId, userId, companyId) {
-    // 1. Check for Active Rules
-    const [rules] = await pool.execute('SELECT * FROM ApprovalRules WHERE company_id = ? AND is_active = TRUE', [companyId]);
-    
-    // 2. Get Employee's Manager
+    // Get Expense details to check the amount
+    const [expenseRows] = await pool.execute('SELECT converted_amount FROM Expenses WHERE id = ?', [expenseId]);
+    const amount = expenseRows[0].converted_amount;
+
+    // 1. Get Employee's Manager
     const [userRows] = await pool.execute('SELECT manager_id FROM Users WHERE id = ?', [userId]);
     const managerId = userRows[0].manager_id;
 
-    if (rules.length > 0) {
-        // If there's a custom rule (e.g., specific approver or parallel/conditional)
-        // For demonstration, let's create entries for all approvers if it's conditional/parallel
-        const rule = rules[0];
-        const config = typeof rule.config === 'string' ? JSON.parse(rule.config) : rule.config;
+    // 2. Get an Admin for the company (needed for amount > 5000, excluding the submitter)
+    const [adminRows] = await pool.execute('SELECT id FROM Users WHERE company_id = ? AND role = "Admin" AND id != ? LIMIT 1', [companyId, userId]);
+    const adminId = adminRows.length > 0 ? adminRows[0].id : null;
 
-        if (rule.rule_type === 'conditional' || rule.rule_type === 'parallel') {
-             // Parallel: All are pending immediately
-             const approvers = new Set();
-             if (managerId) approvers.add(managerId);
-             if (config.specificApproverId) approvers.add(config.specificApproverId);
-
-             for (const approverId of approvers) {
-                 await pool.execute('INSERT INTO Approvals (expense_id, user_id, status) VALUES (?, ?, ?)', [expenseId, approverId, 'pending']);
-                 sendNotification(approverId, { message: 'New expense pending your approval', expenseId });
-             }
-             return;
-        } else if (rule.rule_type === 'sequential') {
-            // Sequence of approvers from config?
-            // Let's mock a sequence if provided in config.approvers = [id1, id2, id3]
-            if (config.approvers && config.approvers.length > 0) {
-                for (let i = 0; i < config.approvers.length; i++) {
-                    const status = (i === 0) ? 'pending' : 'waiting';
-                    await pool.execute('INSERT INTO Approvals (expense_id, user_id, step_number, status) VALUES (?, ?, ?, ?)',
-                        [expenseId, config.approvers[i], i + 1, status]);
-                    if (status === 'pending') {
-                        sendNotification(config.approvers[i], { message: 'New expense pending your approval', expenseId });
-                    }
-                }
-                return;
-            }
+    if (amount <= 5000) {
+        // Rule 1: Amount <= 5000 -> Only Manager approval required
+        if (managerId && managerId !== userId) {
+            await pool.execute(
+                'INSERT INTO Approvals (expense_id, user_id, step_number, status) VALUES (?, ?, ?, ?)',
+                [expenseId, managerId, 1, 'pending']
+            );
+            sendNotification(managerId, { message: 'New expense pending your approval', expenseId });
+        } else if (adminId) {
+            // Fallback to Admin if no Manager assigned or user is their own manager
+            await pool.execute(
+                'INSERT INTO Approvals (expense_id, user_id, step_number, status) VALUES (?, ?, ?, ?)',
+                [expenseId, adminId, 1, 'pending']
+            );
+            sendNotification(adminId, { message: 'New expense pending your approval', expenseId });
+        } else {
+            // No other approvers found (e.g., user is the only Manager/Admin)
+            await pool.execute('UPDATE Expenses SET status = ? WHERE id = ?', ['approved', expenseId]);
+            sendNotification(userId, { message: 'Your expense has been auto-approved as no other approvers were found.', expenseId });
         }
-    }
-
-    // Default: Manager First (Step 1)
-    if (managerId) {
-        await pool.execute(
-            'INSERT INTO Approvals (expense_id, user_id, step_number, status) VALUES (?, ?, ?, ?)',
-            [expenseId, managerId, 1, 'pending']
-        );
-        sendNotification(managerId, { message: 'New expense pending your approval', expenseId });
     } else {
-        await pool.execute('UPDATE Expenses SET status = ? WHERE id = ?', ['approved', expenseId]);
+        // Rule 1: Amount > 5000 -> Sequential: Manager then Admin
+        let step = 1;
+        let approverAdded = false;
+
+        if (managerId && managerId !== userId) {
+            await pool.execute(
+                'INSERT INTO Approvals (expense_id, user_id, step_number, status) VALUES (?, ?, ?, ?)',
+                [expenseId, managerId, step++, 'pending']
+            );
+            sendNotification(managerId, { message: 'New expense pending your approval', expenseId });
+            approverAdded = true;
+        }
+
+        if (adminId) {
+            // Step 2 (Admin) is waiting if Manager exists, otherwise pending
+            const status = (approverAdded) ? 'waiting' : 'pending';
+            await pool.execute(
+                'INSERT INTO Approvals (expense_id, user_id, step_number, status) VALUES (?, ?, ?, ?)',
+                [expenseId, adminId, step++, status]
+            );
+            if (status === 'pending') {
+                sendNotification(adminId, { message: 'New expense pending your approval', expenseId });
+            }
+            approverAdded = true;
+        }
+
+        if (!approverAdded) {
+            // No other approvers found
+            await pool.execute('UPDATE Expenses SET status = ? WHERE id = ?', ['approved', expenseId]);
+            sendNotification(userId, { message: 'Your expense has been auto-approved as no other approvers were found.', expenseId });
+        }
     }
 }
 
