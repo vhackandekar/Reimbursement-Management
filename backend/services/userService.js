@@ -45,4 +45,11 @@ const sendPassword = async (userId) => {
     return { message: 'Password reset and sent', newPassword: randomPassword };
 };
 
-module.exports = { createUser, getAllUsers, updateUser, assignManager, updateRole, sendPassword };
+const deleteUser = async (userId, companyId) => {
+    // Optionally verify companyId if needed
+    const [result] = await pool.execute('DELETE FROM Users WHERE id = ? AND company_id = ?', [userId, companyId]);
+    if (result.affectedRows === 0) throw new Error('User not found or already deleted');
+    return { message: 'User deleted successfully' };
+};
+
+module.exports = { createUser, getAllUsers, updateUser, assignManager, updateRole, sendPassword, deleteUser };

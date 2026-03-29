@@ -23,7 +23,7 @@ const createExpense = async (userId, companyId, data, receiptUrl) => {
     const expenseId = result.insertId;
 
     if (status === 'pending') {
-        await initiateApprovalProcess(expenseId, userId, companyId);
+        await initiateApprovalProcess(expenseId, userId, companyId, convertedAmount);
     }
 
     return { id: expenseId, status, message: 'Expense saved' };
@@ -61,7 +61,7 @@ const getAllCompanyExpenses = async (companyId, role, userId, status) => {
     return rows;
 };
 
-async function initiateApprovalProcess(expenseId, userId, companyId) {
+async function initiateApprovalProcess(expenseId, userId, companyId, amount) {
     // 1. Check for Active Rules
     const [rules] = await pool.execute('SELECT * FROM ApprovalRules WHERE company_id = ? AND is_active = TRUE', [companyId]);
     
@@ -70,12 +70,37 @@ async function initiateApprovalProcess(expenseId, userId, companyId) {
     const managerId = userRows[0].manager_id;
 
     if (rules.length > 0) {
-        // If there's a custom rule (e.g., specific approver or parallel/conditional)
-        // For demonstration, let's create entries for all approvers if it's conditional/parallel
-        const rule = rules[0];
+        // Find if an amount rule exists
+        const amountRule = rules.find(r => r.rule_type === 'conditional' && (typeof r.config === 'string' ? JSON.parse(r.config).amountThreshold : r.config.amountThreshold));
+        let rule = rules[0]; // fallback
+        
+        if (amountRule) {
+            const config = typeof amountRule.config === 'string' ? JSON.parse(amountRule.config) : amountRule.config;
+            if (amount > config.amountThreshold) rule = amountRule;
+        }
+
         const config = typeof rule.config === 'string' ? JSON.parse(rule.config) : rule.config;
 
-        if (rule.rule_type === 'conditional' || rule.rule_type === 'parallel') {
+        // Amount-Based Rule Logic (Multi-level)
+        if (rule.rule_type === 'conditional' && config.amountThreshold && amount > config.amountThreshold) {
+             let sequence = config.approvers && config.approvers.length > 0 ? config.approvers : [];
+             if (sequence.length === 0) {
+                 if (managerId) sequence.push(managerId);
+                 if (config.specificApproverId) sequence.push(config.specificApproverId);
+             }
+             
+             if (sequence.length > 0) {
+                 for (let i = 0; i < sequence.length; i++) {
+                     const status = (i === 0) ? 'pending' : 'waiting';
+                     await pool.execute('INSERT INTO Approvals (expense_id, user_id, step_number, status) VALUES (?, ?, ?, ?)',
+                         [expenseId, sequence[i], i + 1, status]);
+                     if (status === 'pending') {
+                         sendNotification(sequence[i], { message: 'New expense pending your approval', expenseId });
+                     }
+                 }
+                 return;
+             }
+        } else if (rule.rule_type === 'conditional' || rule.rule_type === 'parallel') {
              // Parallel: All are pending immediately
              const approvers = new Set();
              if (managerId) approvers.add(managerId);
@@ -88,7 +113,6 @@ async function initiateApprovalProcess(expenseId, userId, companyId) {
              return;
         } else if (rule.rule_type === 'sequential') {
             // Sequence of approvers from config?
-            // Let's mock a sequence if provided in config.approvers = [id1, id2, id3]
             if (config.approvers && config.approvers.length > 0) {
                 for (let i = 0; i < config.approvers.length; i++) {
                     const status = (i === 0) ? 'pending' : 'waiting';

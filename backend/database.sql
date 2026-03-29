@@ -32,8 +32,10 @@ CREATE TABLE IF NOT EXISTS Expenses (
     paid_by VARCHAR(100) NOT NULL,
     receipt_url VARCHAR(255),
     status ENUM('draft', 'pending', 'approved', 'rejected') DEFAULT 'draft',
+    current_approver_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (current_approver_id) REFERENCES Users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS ApprovalRules (
@@ -64,3 +66,4 @@ CREATE TABLE IF NOT EXISTS Approvals (
 CREATE INDEX idx_user_email ON Users(email);
 CREATE INDEX idx_expense_status ON Expenses(status);
 CREATE INDEX idx_approval_status ON Approvals(status);
+
