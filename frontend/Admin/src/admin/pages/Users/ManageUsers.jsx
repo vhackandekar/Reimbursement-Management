@@ -32,85 +32,52 @@ export default function ManageUsers() {
           <table className="w-full text-left whitespace-nowrap">
             <thead>
               <tr className="bg-slate-50/50 dark:bg-[#0F172A]/30 border-b border-slate-200 dark:border-slate-700/50 transition-colors duration-200">
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Phone</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">User</th>
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Role</th>
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Manager</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Access Level</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 text-right uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 text-center uppercase tracking-wider">Action</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 text-right uppercase tracking-wider">Options</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
               {users.map((emp) => (
                 <tr key={emp.id} className="hover:bg-slate-50 dark:hover:bg-[#0F172A]/50 transition-colors group">
                   
-                  {/* Name */}
+                  {/* User (Name + Avatar) */}
                   <td className="px-6 py-5">
-                    <span className="text-sm font-semibold text-slate-900 dark:text-white">{emp.name}</span>
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 mr-3 text-[10px] font-bold">
+                        {emp.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <span className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">{emp.name.toLowerCase()}</span>
+                    </div>
                   </td>
                   
+                  {/* Role (Static) */}
+                  <td className="px-6 py-5">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                      {emp.role}
+                    </span>
+                  </td>
+
+                  {/* Manager (Static) */}
+                  <td className="px-6 py-5">
+                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      {emp.manager === 'None' ? '—' : emp.manager}
+                    </span>
+                  </td>
+
                   {/* Email */}
                   <td className="px-6 py-5">
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{emp.email}</span>
-                  </td>
-                  
-                  {/* Phone */}
-                  <td className="px-6 py-5">
-                     <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{emp.phone}</span>
-                  </td>
-                  
-                  {/* Role Dropdown */}
-                  <td className="px-6 py-5 w-40">
-                    <div className="relative">
-                       <select 
-                         defaultValue={emp.role}
-                         className="w-full bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white font-medium py-2 pl-3 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer shadow-sm"
-                       >
-                         <option value="Employee">Employee</option>
-                         <option value="Manager">Manager</option>
-                       </select>
-                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                         <svg className="fill-current w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
-                       </div>
-                    </div>
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400 underline decoration-slate-200 dark:decoration-slate-700 underline-offset-4">{emp.email}</span>
                   </td>
 
-                  {/* Manager Dropdown */}
-                  <td className="px-6 py-5 w-48">
-                    <div className="relative">
-                       <select 
-                         defaultValue={emp.manager}
-                         className="w-full bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white font-medium py-2 pl-3 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer shadow-sm"
-                       >
-                         <option value="None">None</option>
-                         <option value="Sarah Smith">Sarah Smith</option>
-                         <option value="John Doe">John Doe</option>
-                       </select>
-                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                         <svg className="fill-current w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
-                       </div>
-                    </div>
-                  </td>
-
-                  {/* Access Level Dropdown */}
-                  <td className="px-6 py-5 w-44">
-                    <div className="relative">
-                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <ShieldAlert className={`w-3.5 h-3.5 ${emp.access === 'Full Access' ? 'text-blue-500' : emp.access === 'Standard' ? 'text-green-500' : 'text-amber-500' }`} />
-                       </div>
-                       <select 
-                         defaultValue={emp.access}
-                         className="w-full bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white font-medium py-2 pl-8 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer shadow-sm"
-                       >
-                         <option value="Full Access">Full Access</option>
-                         <option value="Standard">Standard</option>
-                         <option value="Restricted">Restricted</option>
-                       </select>
-                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                         <svg className="fill-current w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
-                       </div>
-                    </div>
+                  {/* Send Password Action (Key Integration) */}
+                  <td className="px-6 py-5 text-center">
+                    <button className="px-5 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 text-white text-[11px] font-bold rounded-xl transition-all shadow-sm active:scale-95 border border-slate-700 dark:border-slate-600">
+                      Send password
+                    </button>
                   </td>
 
                   {/* Actions */}
