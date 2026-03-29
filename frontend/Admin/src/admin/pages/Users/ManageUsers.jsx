@@ -1,12 +1,12 @@
 import React from 'react';
-import { Send, Edit3, Trash2 } from 'lucide-react';
+import { Edit3, Trash2, ShieldAlert } from 'lucide-react';
 
 export default function ManageUsers() {
   const users = [
-    { id: 1, name: 'John Doe', email: 'john.doe@company.com', phone: '+1 234-567-8901', role: 'Employee', department: 'Sales', manager: 'Sarah Smith' },
-    { id: 2, name: 'Jane Wilson', email: 'jane.wilson@company.com', phone: '+1 234-567-8902', role: 'Employee', department: 'Marketing', manager: 'Sarah Smith' },
-    { id: 3, name: 'Michael Lee', email: 'michael.lee@company.com', phone: '+1 234-567-8903', role: 'Manager', department: 'Engineering', manager: 'None' },
-    { id: 4, name: 'Sarah Smith', email: 'sarah.smith@company.com', phone: '+1 234-567-8904', role: 'Manager', department: 'Sales', manager: 'None' },
+    { id: 1, name: 'John Doe', email: 'john.doe@company.com', phone: '+1 234-567-8901', role: 'Employee', access: 'Standard', manager: 'Sarah Smith' },
+    { id: 2, name: 'Jane Wilson', email: 'jane.wilson@company.com', phone: '+1 234-567-8902', role: 'Employee', access: 'Restricted', manager: 'Sarah Smith' },
+    { id: 3, name: 'Michael Lee', email: 'michael.lee@company.com', phone: '+1 234-567-8903', role: 'Manager', access: 'Full Access', manager: 'None' },
+    { id: 4, name: 'Sarah Smith', email: 'sarah.smith@company.com', phone: '+1 234-567-8904', role: 'Manager', access: 'Full Access', manager: 'None' },
   ];
 
   return (
@@ -36,8 +36,8 @@ export default function ManageUsers() {
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Phone</th>
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Department</th>
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Manager</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Access Level</th>
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 text-right uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -75,11 +75,6 @@ export default function ManageUsers() {
                        </div>
                     </div>
                   </td>
-                  
-                  {/* Department */}
-                  <td className="px-6 py-5">
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{emp.department}</span>
-                  </td>
 
                   {/* Manager Dropdown */}
                   <td className="px-6 py-5 w-48">
@@ -98,17 +93,33 @@ export default function ManageUsers() {
                     </div>
                   </td>
 
+                  {/* Access Level Dropdown */}
+                  <td className="px-6 py-5 w-44">
+                    <div className="relative">
+                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <ShieldAlert className={`w-3.5 h-3.5 ${emp.access === 'Full Access' ? 'text-blue-500' : emp.access === 'Standard' ? 'text-green-500' : 'text-amber-500' }`} />
+                       </div>
+                       <select 
+                         defaultValue={emp.access}
+                         className="w-full bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white font-medium py-2 pl-8 pr-8 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer shadow-sm"
+                       >
+                         <option value="Full Access">Full Access</option>
+                         <option value="Standard">Standard</option>
+                         <option value="Restricted">Restricted</option>
+                       </select>
+                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                         <svg className="fill-current w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                       </div>
+                    </div>
+                  </td>
+
                   {/* Actions */}
-                  <td className="px-6 py-5 text-right w-56">
-                    <div className="flex items-center justify-end space-x-3">
-                      <button className="flex items-center px-3 py-1.5 border border-blue-500/30 dark:border-[#2463EB]/40 bg-blue-500/5 dark:bg-transparent hover:bg-blue-50 dark:hover:bg-[#2463EB]/10 rounded-lg transition-colors text-blue-600 dark:text-blue-500 font-medium text-sm shadow-sm justify-center">
-                         <Send className="w-3.5 h-3.5 mr-2" />
-                         Send Password
-                      </button>
-                      <button className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors p-1" title="Edit">
+                  <td className="px-6 py-5 text-right">
+                    <div className="flex items-center justify-end space-x-2">
+                      <button className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-blue-500/30 shadow-sm" title="Edit Profile">
                          <Edit3 className="w-4 h-4" />
                       </button>
-                      <button className="text-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors p-1" title="Delete">
+                      <button className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-500/30 shadow-sm" title="Delete User">
                          <Trash2 className="w-4 h-4" />
                       </button>
                     </div>

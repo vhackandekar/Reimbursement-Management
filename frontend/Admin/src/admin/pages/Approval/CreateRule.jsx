@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Plus, Target, Info, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 
 export default function CreateRule() {
   const navigate = useNavigate();
-  const [flowType, setFlowType] = useState('Sequential');
-  const [steps, setSteps] = useState([{ id: 1, user: '', required: true }]);
-
-  const addStep = () => {
-    setSteps([...steps, { id: steps.length + 1, user: '', required: false }]);
-  };
-
-  const removeStep = (id) => {
-    setSteps(steps.filter(step => step.id !== id).map((step, index) => ({ ...step, id: index + 1 })));
-  };
+  const [approvers, setApprovers] = useState([
+    { id: 1, name: 'John', required: true },
+    { id: 2, name: 'Mitchell', required: false },
+    { id: 3, name: 'Andreas', required: false },
+  ]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -21,184 +16,152 @@ export default function CreateRule() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 max-w-4xl pb-10">
-      <div className="flex items-center space-x-4">
-        <button onClick={() => navigate(-1)} className="p-2 bg-[#1E293B] hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg transition-colors border border-slate-700/50">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-white">Create Approval Rule</h1>
-          <p className="text-slate-400 mt-1 text-sm">Configure dynamic approval chains and conditions.</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Main Form Area */}
-        <div className="lg:col-span-2 space-y-6">
-          <form onSubmit={handleSubmit} id="ruleForm" className="space-y-6">
-            
-            {/* 🧩 Section 1: Rule Info */}
-            <div className="bg-[#1E293B] rounded-xl border border-slate-700/50 p-6 space-y-4">
-              <h2 className="text-lg font-semibold text-white flex items-center border-b border-slate-700/50 pb-3">
-                <span className="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs mr-3">1</span>
-                Rule Info
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-slate-300 mb-1.5 block">Rule Name</label>
-                  <input type="text" required className="w-full px-4 py-2 bg-[#0F172A] border border-slate-700/50 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. High Value Hardware" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-slate-300 mb-1.5 block">Description</label>
-                  <textarea rows="2" className="w-full px-4 py-2 bg-[#0F172A] border border-slate-700/50 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Applies to equipment > $1000"></textarea>
-                </div>
-              </div>
-            </div>
-
-            {/* 🧩 Section 2: Manager Config */}
-            <div className="bg-[#1E293B] rounded-xl border border-slate-700/50 p-6 space-y-4">
-              <h2 className="text-lg font-semibold text-white flex items-center border-b border-slate-700/50 pb-3">
-                <span className="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs mr-3">2</span>
-                Manager Config
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                <div>
-                  <label className="text-sm font-medium text-slate-300 mb-1.5 block">Default Manager Mapping</label>
-                  <select className="w-full px-4 py-2 bg-[#0F172A] border border-slate-700/50 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
-                    <option>Dynamic (User's Manager)</option>
-                    <option>Specific Person</option>
-                  </select>
-                </div>
-                <div className="flex items-center space-x-3 h-[38px] px-3 bg-[#0F172A] rounded-lg border border-slate-700/50">
-                   <input type="checkbox" id="includeManager" defaultChecked className="w-4 h-4 rounded border-slate-600 bg-[#0F172A] text-blue-500 focus:ring-blue-500/50" />
-                   <label htmlFor="includeManager" className="text-sm font-medium text-slate-300 cursor-pointer">Include Manager in Rule</label>
-                </div>
-              </div>
-            </div>
-
-            {/* 🧩 Section 4: Flow Type */}
-            <div className="bg-[#1E293B] rounded-xl border border-slate-700/50 p-6 space-y-4">
-              <h2 className="text-lg font-semibold text-white flex items-center border-b border-slate-700/50 pb-3">
-                <span className="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs mr-3">3</span>
-                Flow Type
-              </h2>
-              <div className="flex p-1 bg-[#0F172A] rounded-lg border border-slate-700/50 max-w-sm">
-                 <button 
-                   type="button"
-                   onClick={() => setFlowType('Sequential')}
-                   className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${flowType === 'Sequential' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
-                 >
-                   Sequential
-                 </button>
-                 <button 
-                   type="button"
-                   onClick={() => setFlowType('Parallel')}
-                   className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${flowType === 'Parallel' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
-                 >
-                   Parallel
-                 </button>
-              </div>
-            </div>
-
-            {/* 🧩 Section 3: Approver Steps */}
-            <div className="bg-[#1E293B] rounded-xl border border-slate-700/50 p-6 space-y-4">
-              <div className="flex justify-between items-end border-b border-slate-700/50 pb-3">
-                <h2 className="text-lg font-semibold text-white flex items-center">
-                  <span className="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs mr-3">4</span>
-                  Approver Steps
-                </h2>
-                <button type="button" onClick={addStep} className="text-sm text-blue-400 hover:text-blue-300 font-medium flex items-center">
-                  <Plus className="w-4 h-4 mr-1" /> Add Step
-                </button>
-              </div>
-              
-              <div className="space-y-3">
-                {steps.map((step) => (
-                  <div key={step.id} className="flex relative items-center gap-4 bg-[#0F172A] p-3 rounded-lg border border-slate-700/50 group">
-                    <div className="w-6 h-6 rounded bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400 shrink-0">
-                      {step.id}
-                    </div>
-                    <select className="flex-1 bg-transparent text-sm text-white focus:outline-none appearance-none font-medium">
-                      <option className="bg-slate-800" value="">Select Approver Role/User...</option>
-                      <option className="bg-slate-800" value="Direct Manager">Direct Manager</option>
-                      <option className="bg-slate-800" value="CFO">CFO (John Smith)</option>
-                      <option className="bg-slate-800" value="Finance Team">Finance Team</option>
-                    </select>
-                    
-                    <div className="flex items-center space-x-2 bg-slate-800/50 px-3 py-1.5 rounded-md border border-slate-700/50">
-                      <input type="checkbox" id={`req-${step.id}`} defaultChecked={step.required} className="w-3.5 h-3.5 rounded border-slate-600 bg-transparent text-blue-500 focus:ring-blue-500/50" />
-                      <label htmlFor={`req-${step.id}`} className="text-xs font-medium text-slate-300 cursor-pointer">Required</label>
-                    </div>
-
-                    {steps.length > 1 && (
-                      <button type="button" onClick={() => removeStep(step.id)} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -right-8">
-                         Remove
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 🧩 Section 5: Conditional Approval */}
-            <div className="bg-[#1E293B] rounded-xl border border-slate-700/50 p-6 space-y-4">
-              <h2 className="text-lg font-semibold text-white flex items-center border-b border-slate-700/50 pb-3">
-                <span className="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs mr-3">5</span>
-                Minimum Approval Limit
-              </h2>
-              <div>
-                <label className="text-sm font-medium text-slate-300 mb-1.5 block">Minimum Approval Percentage (%)</label>
-                <div className="flex items-center space-x-4 max-w-sm">
-                  <input type="range" min="0" max="100" defaultValue="100" className="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500" />
-                  <div className="w-16 px-3 py-1.5 bg-[#0F172A] border border-slate-700/50 rounded-lg text-center font-semibold text-white text-sm">
-                    100%
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </form>
-        </div>
-
-        {/* 🧩 Section 6: Helper Text Sidebar */}
-        <div className="space-y-6">
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-5 sticky top-24">
-            <h3 className="flex items-center text-blue-400 font-semibold mb-3">
-              <Info className="w-5 h-5 mr-2" /> Rule Guidelines
-            </h3>
-            
-            <div className="space-y-4">
-               <div>
-                 <h4 className="text-sm font-medium text-blue-300 mb-1">Required Approvers</h4>
-                 <p className="text-xs text-blue-200/60 leading-relaxed">If checked, this specific person MUST approve the request, regardless of the percentage logic or parallel setups.</p>
-               </div>
-               
-               <div>
-                 <h4 className="text-sm font-medium text-blue-300 mb-1">Sequential Flow</h4>
-                 <p className="text-xs text-blue-200/60 leading-relaxed">Approvals request moves one by one. Step 2 requires Step 1 to approve first. Rejection immediately ends the chain.</p>
-               </div>
-
-               <div>
-                 <h4 className="text-sm font-medium text-blue-300 mb-1">Parallel Flow</h4>
-                 <p className="text-xs text-blue-200/60 leading-relaxed">All approvers in the chain get the request immediately. Great for percentage-based general consensus (e.g. 60% of team).</p>
-               </div>
-            </div>
+    <div className="space-y-6 animate-in fade-in duration-300 max-w-[1200px] mx-auto pb-10 font-sans">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center space-x-4">
+          <button onClick={() => navigate(-1)} className="p-2 bg-white dark:bg-[#1E293B] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg transition-colors border border-slate-200 dark:border-slate-700/50 shadow-sm">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Admin view (Approval rules)</h1>
           </div>
         </div>
-
-      </div>
-
-      <div className="flex justify-end pt-6 border-t border-slate-800">
-        <button type="button" onClick={() => navigate(-1)} className="px-6 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors mr-3">
-          Cancel
-        </button>
-        <button form="ruleForm" type="submit" className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg flex items-center transition-colors shadow-sm">
+        <button form="approvalForm" type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg flex items-center transition-colors shadow-md shadow-blue-500/20">
           <Save className="w-4 h-4 mr-2" />
-          Create Rule Structure
+          Save Rule
         </button>
       </div>
 
+      <div className="bg-white dark:bg-[#111827] rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-8 md:p-12 transition-colors duration-200">
+        <form id="approvalForm" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+          
+          {/* LEFT COLUMN */}
+          <div className="space-y-12">
+            
+            {/* User Field */}
+            <div className="flex items-end space-x-4">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 w-16 pb-1">User</label>
+              <input 
+                type="text" 
+                defaultValue="marc"
+                className="flex-1 bg-transparent border-0 border-b border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-0 px-0 py-1 text-slate-900 dark:text-white font-medium text-lg placeholder-slate-400"
+              />
+            </div>
+
+            {/* Description Field */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block">Description about rules</label>
+              <input 
+                type="text" 
+                defaultValue="Approval rule for miscellaneous expenses"
+                className="w-full bg-transparent border-0 border-b border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-0 px-0 py-1 text-slate-900 dark:text-white font-medium text-lg placeholder-slate-400"
+              />
+            </div>
+
+            {/* Manager Field */}
+            <div className="space-y-3">
+              <div className="flex items-end space-x-4">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 w-16 pb-1">Manager</label>
+                <div className="relative flex-1">
+                  <select className="w-full bg-transparent border-0 border-b border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-0 px-0 py-1 text-slate-900 dark:text-white font-medium text-lg appearance-none cursor-pointer">
+                    <option value="sarah" className="bg-white dark:bg-slate-800">sarah</option>
+                    <option value="john" className="bg-white dark:bg-slate-800">john</option>
+                  </select>
+                  <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic max-w-sm ml-20">
+                Dynamic dropdown. Initially the manager set on user record should be set, admin can change manager for approval if required.
+              </p>
+            </div>
+
+          </div>
+
+          {/* RIGHT COLUMN */}
+          <div className="space-y-10">
+            
+            {/* Header / Is Manager an approver */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-slate-200 dark:border-slate-700 pb-2 gap-4">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Approvers</h2>
+              <div className="flex items-center space-x-3 group relative">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Is manager an approver?</span>
+                <input type="checkbox" className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 bg-transparent text-blue-500 focus:ring-blue-500/50 cursor-pointer" />
+                
+                {/* Tooltip replacing the long text arrow */}
+                <div className="absolute top-8 right-0 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  If this field is checked then by default the approve request would go to his/her manager first, before going to other approvers.
+                </div>
+              </div>
+            </div>
+
+            {/* Approvers Table */}
+            <div className="space-y-4">
+              <div className="flex justify-between px-2">
+                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 w-12 text-center">Seq</span>
+                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 flex-1 ml-4">User</span>
+                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 w-24 text-center">Required</span>
+              </div>
+              
+              <div className="space-y-3 relative">
+                {approvers.map((appr, index) => (
+                  <div key={appr.id} className="flex items-center px-2 py-1">
+                    <span className="text-lg font-bold text-slate-900 dark:text-white w-12 text-center">{appr.id}</span>
+                    <div className="flex-1 border-b border-slate-300 dark:border-slate-600 ml-4 pb-1">
+                      <span className="text-lg font-medium text-slate-900 dark:text-white">{appr.name}</span>
+                    </div>
+                    <div className="w-24 flex justify-center border-b border-slate-300 dark:border-slate-600 pb-1">
+                      <input 
+                        type="checkbox" 
+                        defaultChecked={appr.required}
+                        className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 bg-transparent text-blue-500 focus:ring-blue-500/50 cursor-pointer" 
+                      />
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Note pointing to Required checkbox */}
+                <div className="absolute -right-4 md:-right-48 top-4 w-40 text-[11px] text-slate-500 dark:text-slate-400 leading-tight hidden md:block">
+                  ← If this field is ticked, then anyhow approval of this approver is required in any approval combination scenario.
+                </div>
+              </div>
+            </div>
+
+            {/* Approvers Sequence */}
+            <div className="space-y-2 pt-4">
+              <div className="flex items-center space-x-3">
+                <label className="text-sm font-bold text-slate-900 dark:text-white">Approvers Sequence:</label>
+                <input type="checkbox" className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 bg-transparent text-blue-500 focus:ring-blue-500/50 cursor-pointer" />
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-md">
+                If this field is ticked true then the above mentioned sequence of approvers matters, that is first the request goes to John, if he approves/rejects then only request goes to mitchell and so on.
+                <br/><br/>
+                If the required approver rejects the request, then expense request is auto-rejected. If not ticked then send approver request to all approvers at the same time.
+              </p>
+            </div>
+
+            {/* Minimum Approval Percentage */}
+            <div className="space-y-2 pt-8">
+              <div className="flex items-end space-x-3">
+                <label className="text-sm font-bold text-slate-900 dark:text-white pb-1">Minimum Approval percentage:</label>
+                <div className="flex items-baseline border-b border-slate-300 dark:border-slate-600 pb-1">
+                  <input 
+                    type="number" 
+                    className="w-16 bg-transparent border-0 focus:ring-0 px-1 py-0 text-slate-900 dark:text-white font-medium text-lg text-center"
+                  />
+                  <span className="text-slate-900 dark:text-white font-medium ml-1">%</span>
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 pt-4 max-w-sm">
+                Specify the number of percentage approvers required in order to get the request approved.
+              </p>
+            </div>
+
+          </div>
+
+        </form>
+      </div>
     </div>
   );
 }

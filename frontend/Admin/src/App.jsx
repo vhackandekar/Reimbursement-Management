@@ -14,6 +14,7 @@ import ManageUsers from './admin/pages/Users/ManageUsers';
 import ApprovalRules from './admin/pages/Approval/ApprovalRules';
 import Settings from './admin/pages/Settings/Settings';
 import AddUser from './admin/pages/Users/AddUser';
+import Approvers from './admin/pages/Users/Approvers';
 import CreateRule from './admin/pages/Approval/CreateRule';
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<ManageUsers />} />
           <Route path="users/new" element={<AddUser />} />
+          <Route path="users/approvers" element={<Approvers />} />
           <Route path="rules" element={<ApprovalRules />} />
           <Route path="rules/new" element={<CreateRule />} />
           <Route path="settings" element={<Settings />} />
