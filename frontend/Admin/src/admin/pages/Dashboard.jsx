@@ -90,21 +90,13 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Quick Actions */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-wide">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <QuickAction icon={Users} title="Manage Users" isPrimary={true} onClick={() => navigate('/admin/users')} />
-          <QuickAction icon={FileText} title="Approval Rules" isPrimary={false} onClick={() => navigate('/admin/rules')} />
-          <QuickAction icon={DollarSign} title="View All Expenses" isPrimary={false} onClick={() => {}} />
-        </div>
-      </div>
+
 
       {/* Recent Expense Requests */}
       <div className="pt-4 space-y-4">
          <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-wide">Recent Expense Requests</h2>
-            <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-semibold transition-colors">
+            <button onClick={() => navigate('/admin/expenses')} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-semibold transition-colors">
               View All
             </button>
          </div>

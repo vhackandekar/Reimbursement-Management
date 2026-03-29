@@ -60,6 +60,7 @@ export default function AdminLayout() {
               <SidebarItem icon={UserPlus} label="Add User" to="/admin/users/new" />
               <SidebarItem icon={UserCheck} label="Approvers" to="/admin/users/approvers" />
               <SidebarItem icon={FileText} label="Approval Rules" to="/admin/rules" />
+              <SidebarItem icon={DollarSign} label="Expense Requests" to="/admin/expenses" />
               <SidebarItem icon={Settings} label="Settings" to="/admin/settings" />
             </nav>
             

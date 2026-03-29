@@ -16,6 +16,7 @@ import Settings from './admin/pages/Settings/Settings';
 import AddUser from './admin/pages/Users/AddUser';
 import Approvers from './admin/pages/Users/Approvers';
 import CreateRule from './admin/pages/Approval/CreateRule';
+import ExpenseRequests from './admin/pages/Expenses/ExpenseRequests';
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="users/approvers" element={<Approvers />} />
           <Route path="rules" element={<ApprovalRules />} />
           <Route path="rules/new" element={<CreateRule />} />
+          <Route path="expenses" element={<ExpenseRequests />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
